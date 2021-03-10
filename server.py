@@ -8,6 +8,10 @@ This is a simple Battlesnake server written in Python.
 For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python/README.md
 """
 
+import logging
+logging.basicConfig(filename='debug.log', level=logging.DEBUG)
+
+moveIndex = 0
 
 class Battlesnake(object):
     @cherrypy.expose
@@ -42,22 +46,33 @@ class Battlesnake(object):
         # Valid moves are "up", "down", "left", or "right".
         # TODO: Use the information in cherrypy.request.json to decide your next move.
         data = cherrypy.request.json
+        global moveIndex
+        
+        board = data["board"]
+        boardRows = board["height"]
+        boardCols = board["width"]
+        #logging.debug("Size:("+boardSizeX+","+boardSizeY+")")
+        #logging.debug("Position: ("+x+","+y+")")
+        logging.debug("Board: "+str(boardRows)+"x"+str(boardCols))
+        x = data["you"]["body"][0]["x"]
+        y = data["you"]["body"][0]["y"]
 
-        # Choose a random direction to move in
-        ### possible_moves = ["up", "down", "left", "right"]
-        ### move = random.choice(possible_moves)
-        boardSizeY = data.board.height
-        boardSizeX = data.board.width
-        x = data.body[0].x
-        y = data.body[0].y
-        print (boardSizeX, boardSizeY, x, y)
-          
-        possible_moves = ["up", "down", "left", "right"]
-        if y+1 < boardSizeY-1:
-          move = possible_moves[0]
+        possible_moves = ["up", "right", "down", "left"]
+        
+        if moveIndex == 0:
+          if y+1 >= boardRows:
+            moveIndex = 1;
+        elif moveIndex == 1:
+          if x+1 >= boardCols:
+            moveIndex = 2;
+        elif moveIndex == 2:
+          if y-1 < 0:
+            moveIndex = 3;
         else:
-          move = possible_moves[3]
-
+          if x-1 < 0:
+            moveIndex = 0
+            
+        move = possible_moves[moveIndex]
         print(f"MOVE: {move}")
         return {"move": move}
 
