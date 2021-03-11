@@ -38,6 +38,9 @@ class Battlesnake(object):
         print("START")
         return "ok"
 
+
+
+
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -45,36 +48,48 @@ class Battlesnake(object):
         # This function is called on every turn of a game. It's how your snake decides where to move.
         # Valid moves are "up", "down", "left", or "right".
         # TODO: Use the information in cherrypy.request.json to decide your next move.
+        global moveIndex 
+        possible_moves = ["up", "right", "down", "left"]
+
+
+
+
+
         data = cherrypy.request.json
-        global moveIndex
         
         board = data["board"]
         boardRows = board["height"]
         boardCols = board["width"]
-        #logging.debug("Size:("+boardSizeX+","+boardSizeY+")")
-        #logging.debug("Position: ("+x+","+y+")")
-        logging.debug("Board: "+str(boardRows)+"x"+str(boardCols))
-        x = data["you"]["body"][0]["x"]
-        y = data["you"]["body"][0]["y"]
 
-        possible_moves = ["up", "right", "down", "left"]
-        
+        you = data["you"]
+
+        x = you["body"][0]["x"]
+        y = you["body"][0]["y"]
+
+        rv = "false";
         if moveIndex == 0:
           if y+1 >= boardRows:
-            moveIndex = 1;
+            rv = "true"
         elif moveIndex == 1:
           if x+1 >= boardCols:
-            moveIndex = 2;
+            rv = "true"
         elif moveIndex == 2:
           if y-1 < 0:
-            moveIndex = 3;
+            rv = "true"
         else:
-          if x-1 < 0:
+          if x-1 < 0:    
+            rv = "true"
+        
+        if (rv == "true"):
+          moveIndex += 1
+          if (moveIndex >3):
             moveIndex = 0
-            
+
+        logging.debug("moveIndex:"+str(moveIndex))
         move = possible_moves[moveIndex]
         print(f"MOVE: {move}")
         return {"move": move}
+
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
